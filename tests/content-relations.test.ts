@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import type { Person, Project, School } from "@/content/model";
 import {
   findSchool,
-  personHue,
   personProjects,
   projectHue,
   projectPeople,
@@ -51,7 +50,6 @@ describe("content relations", () => {
   it("colours entries by their place in the list", () => {
     expect(schoolHue(content, content.schools[0]!)).toBe("teal");
     expect(schoolHue(content, content.schools[1]!)).toBe("amber");
-    expect(personHue(content, content.people[0]!)).toBe("teal");
     // Projects start two steps along so they don't echo the schools.
     expect(projectHue(content, content.projects[0]!)).toBe("blue");
   });

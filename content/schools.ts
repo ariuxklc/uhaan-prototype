@@ -12,6 +12,7 @@ export const SCHOOLS: readonly School[] = [
   { slug: "hobby", name: { mn: "Хобби Сургууль", en: "Hobby School" }, role: "partner" },
   { slug: "orchlon", name: { mn: "Орчлон Сургууль", en: "Orchlon School" }, role: "partner" },
   { slug: "oyunlag", name: { mn: "Оюунлаг Сургууль", en: "Oyunlag School" }, role: "partner" },
-  { slug: "ub-empathy", name: { mn: "Улаанбааиар Эмпати Сургууль", en: "Ulaanbaatar Empathy School" }, role: "partner" },
+  { slug: "ub-empathy", name: { mn: "Улаанбаатар Эмпати Сургууль", en: "Ulaanbaatar Empathy School" }, role: "partner" },
   { slug: "asu", name: { mn: "Улаанбаатар дахь Америк Сургууль", en: "American School of Ulaanbaatar" }, role: "partner" },
+  { slug: "shine-mongol", name: { mn: "Шинэ Монгол Харүмафүжи Сургууль", en: "Shine Mongol Harumafuji School" }, role: "partner" },
 ];

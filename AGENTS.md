@@ -143,7 +143,7 @@ lib/downloads.ts      download rows, CSV/JSON writers, terms of use
 lib/i18n/             locales, dictionaries, route helpers
 lib/aqi.ts            US AQI bands and colours
 lib/locations.ts      the 22 IQAir cities, identifiers, refresh tiers, geo helpers
-proxy.ts              locale redirect + remembered-locale cookie
+proxy.ts              locale redirect (always to /mn)
 tests/                Vitest unit tests
 ```
 

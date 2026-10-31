@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { negotiateLocale } from "@/lib/i18n/config";
 import { en } from "@/lib/i18n/dictionaries/en";
 import { mn } from "@/lib/i18n/dictionaries/mn";
 import { switchLocalePath } from "@/lib/i18n/routes";
@@ -44,21 +43,6 @@ describe("dictionaries", () => {
         !["nav.switchLanguage", "aqi.unit", "map.legend", "map.source"].includes(key),
     );
     expect(latinOnly).toEqual([]);
-  });
-});
-
-describe("locale negotiation", () => {
-  it.each([
-    [null, "mn"],
-    ["", "mn"],
-    ["en-US,en;q=0.9", "en"],
-    ["mn-MN,mn;q=0.9,en;q=0.8", "mn"],
-    ["ru-RU,ru;q=0.9", "mn"],
-    ["ru;q=0.9,en;q=0.8", "en"],
-    ["en;q=0.5,mn;q=0.8", "mn"],
-    ["mn;q=0,en", "en"],
-  ])("Accept-Language %s → %s", (header, expected) => {
-    expect(negotiateLocale(header)).toBe(expected);
   });
 });
 

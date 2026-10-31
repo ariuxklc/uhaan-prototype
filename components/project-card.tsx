@@ -1,24 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ComponentType, SVGProps } from "react";
 
 import { Avatar } from "@/components/avatar";
-import { AirIcon, ArrowRightIcon, MapIcon, NetworkIcon, WorkshopIcon } from "@/components/icons";
+import { ArrowRightIcon } from "@/components/icons";
 import { localize } from "@/content/model";
-import type { Project, ProjectIcon, ProjectStatus } from "@/content/model";
-import { personHue, projectHue, projectPeople, projectSchools } from "@/lib/content/relations";
+import type { Project, ProjectStatus } from "@/content/model";
+import { projectHue, projectPeople, projectSchools } from "@/lib/content/relations";
 import type { SiteContent } from "@/lib/content/source";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { href } from "@/lib/i18n/routes";
 import type { Hue } from "@/lib/palette";
-
-const ICONS: Record<ProjectIcon, ComponentType<SVGProps<SVGSVGElement>>> = {
-  map: MapIcon,
-  sensor: AirIcon,
-  network: NetworkIcon,
-  workshop: WorkshopIcon,
-};
 
 const STATUS_DOT: Record<ProjectStatus, string> = {
   done: "bg-ink",
@@ -27,32 +19,26 @@ const STATUS_DOT: Record<ProjectStatus, string> = {
 };
 
 function Cover({ project, hue, locale, large }: { project: Project; hue: Hue; locale: Locale; large: boolean }) {
-  const Icon = ICONS[project.icon];
+  if (!project.image) return null;
   return (
     <div
       data-hue={hue}
-      className={`relative overflow-hidden rounded-3xl ${project.image ? "bg-[radial-gradient(circle_at_50%_45%,var(--hue-fill),transparent_78%)]" : "hue-portrait"} ${large ? "aspect-[4/3] md:aspect-auto md:h-full md:min-h-[26rem]" : "aspect-[4/3]"}`}
+      className={`relative overflow-hidden rounded-3xl bg-[radial-gradient(circle_at_50%_45%,var(--hue-fill),transparent_78%)] ${large ? "aspect-[4/3] md:aspect-auto md:h-full md:min-h-[26rem]" : "aspect-[4/3]"}`}
     >
-      {project.image ? (
-        <Image
-          src={project.image.src}
-          alt={localize(project.image.alt, locale)}
-          fill
-          sizes={large ? "(min-width: 768px) 36rem, 90vw" : "(min-width: 1024px) 24rem, (min-width: 640px) 45vw, 90vw"}
-          className="object-contain p-6 drop-shadow-[0_18px_30px_rgb(0_0_0/0.18)]"
-        />
-      ) : (
-        <div className="absolute inset-0 grid place-items-center">
-          <Icon className={large ? "size-24" : "size-16"} strokeWidth={1.25} />
-        </div>
-      )}
+      <Image
+        src={project.image.src}
+        alt={localize(project.image.alt, locale)}
+        fill
+        sizes={large ? "(min-width: 768px) 36rem, 90vw" : "(min-width: 1024px) 24rem, (min-width: 640px) 45vw, 90vw"}
+        className="object-contain p-6 drop-shadow-[0_18px_30px_rgb(0_0_0/0.18)]"
+      />
     </div>
   );
 }
 
 /**
- * A project, led by its picture and the people behind it. `large` is the
- * featured layout: cover and text side by side on wide screens.
+ * A project, led by its picture (when it has one) and the people behind it.
+ * `large` is the featured layout: cover and text side by side on wide screens.
  */
 export function ProjectCard({
   project,
@@ -75,11 +61,12 @@ export function ProjectCard({
   const Heading = headingLevel;
   const people = projectPeople(content, project);
   const schools = projectSchools(content, project).map((school) => localize(school.name, locale));
+  const withPhotos = people.filter((person) => person.photo);
 
   return (
     <article
       id={linkToDetails ? undefined : project.slug}
-      className={`flex scroll-mt-28 flex-col gap-6 ${large ? "md:grid md:grid-cols-[1.1fr_1fr] md:items-center md:gap-12" : ""}`}
+      className={`flex scroll-mt-28 flex-col gap-6 ${large && project.image ? "md:grid md:grid-cols-[1.1fr_1fr] md:items-center md:gap-12" : ""}`}
     >
       <Cover project={project} hue={projectHue(content, project)} locale={locale} large={large} />
 
@@ -111,10 +98,10 @@ export function ProjectCard({
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            {people.length > 0 && (
+            {withPhotos.length > 0 && (
               <span className="flex -space-x-2">
-                {people.map((person) => (
-                  <Avatar key={person.id} person={person} hue={personHue(content, person)} locale={locale} className="size-8 ring-2 ring-bg" />
+                {withPhotos.map((person) => (
+                  <Avatar key={person.id} person={person} locale={locale} className="size-8 ring-2 ring-bg" />
                 ))}
               </span>
             )}

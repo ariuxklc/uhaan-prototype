@@ -78,7 +78,7 @@ lib/downloads.ts      download rows, CSV and JSON writers, terms of use
 lib/i18n/             locales, dictionaries (mn + en), route helpers
 lib/locations.ts      the 22 IQAir cities: identifiers, refresh tiers, geo helpers
 lib/aqi.ts            US AQI bands and colours
-proxy.ts              locale redirect + remembered-locale cookie
+proxy.ts              locale redirect (always to /mn)
 tests/                Vitest unit tests
 ```
 
@@ -314,7 +314,7 @@ data appears.
 ## Internationalisation
 
 Locales are path segments (`/mn`, `/en`). `proxy.ts` redirects locale-less URLs
-using a remembered cookie, then `Accept-Language`, then Mongolian. All
+to Mongolian. All
 interface copy lives in typed dictionaries (`lib/i18n/dictionaries`); `mn.ts`
 must match the shape of `en.ts`, and tests check keys, placeholders and script.
 Relative times use our own strings, so server and browser output always match.

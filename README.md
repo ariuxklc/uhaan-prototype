@@ -44,7 +44,7 @@ Put images in `public/media/` and point to them from the content files:
 | Event photos | `public/media/updates/` | `image` in `updates.ts` | Landscape (16:9). |
 
 For example, `photo: "/media/people/ariunbayar.jpg"`. Until a photo or logo is
-added, people get a coloured card with their initial and schools a monogram.
+added, nothing is shown in its place: no initials, monograms or icon covers.
 Images are resized and converted automatically by Next.js.
 
 ## Quick start

@@ -40,10 +40,6 @@ export function schoolHue(content: SiteContent, school: School): Hue {
   return hueAt(content.schools.findIndex((entry) => entry.slug === school.slug));
 }
 
-export function personHue(content: SiteContent, person: Person): Hue {
-  return hueAt(content.people.findIndex((entry) => entry.id === person.id));
-}
-
 export function projectHue(content: SiteContent, project: Project): Hue {
   return hueAt(content.projects.findIndex((entry) => entry.slug === project.slug) + 2);
 }

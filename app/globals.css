@@ -243,7 +243,7 @@
   color: var(--hue-ink);
 }
 
-/* Portrait fallback: a soft wash of the person's hue with a large initial. */
+/* A soft wash of an entry's hue behind its logo. */
 .hue-portrait {
   background:
     radial-gradient(120% 90% at 20% 10%, color-mix(in oklab, var(--hue-fill) 55%, var(--surface)) 0%, transparent 60%),

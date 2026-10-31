@@ -6,7 +6,7 @@ import { PageIntro } from "@/components/page-intro";
 import { SchoolBadge } from "@/components/school-badge";
 import { localize } from "@/content/model";
 import { getContent } from "@/lib/content";
-import { schoolHue, schoolProjects } from "@/lib/content/relations";
+import { schoolProjects } from "@/lib/content/relations";
 import { isLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { pageMetadata } from "@/lib/i18n/metadata";
@@ -43,7 +43,7 @@ export default async function SchoolsPage({ params }: Props) {
                 className="grid scroll-mt-28 gap-4 border-b border-line py-7 md:grid-cols-12 md:items-center"
               >
                 <div className="flex items-center gap-4 md:col-span-5">
-                  <SchoolBadge school={school} hue={schoolHue(content, school)} locale={lang} className="size-14 rounded-2xl text-2xl" />
+                  <SchoolBadge school={school} className="size-14 rounded-2xl" />
                   <div>
                     <h2 className="text-2xl font-semibold tracking-[-0.02em]">{localize(school.name, lang)}</h2>
                     <p className="mt-0.5 text-sm text-ink-3">

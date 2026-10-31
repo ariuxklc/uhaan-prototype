@@ -25,7 +25,7 @@ export interface School {
   slug: string;
   name: Bilingual;
   role: "host" | "partner";
-  /** Square logo in `public/media/schools/`. A coloured monogram is shown without one. */
+  /** Square logo in `public/media/schools/`. Nothing is shown without one. */
   logo?: string;
 }
 
@@ -38,8 +38,7 @@ export interface Person {
   founder: boolean;
   /**
    * Portrait in `public/media/people/` (ideally 4:5, at least 800px tall).
-   * Only add a photo the person has agreed to share. Without one, a coloured
-   * card with their initial is shown.
+   * Only add a photo the person has agreed to share. Nothing is shown without one.
    */
   photo?: string;
 }

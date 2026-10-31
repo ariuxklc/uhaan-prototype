@@ -8,7 +8,7 @@ import { localize } from "@/content/model";
 import type { Person } from "@/content/model";
 import { getContent } from "@/lib/content";
 import type { SiteContent } from "@/lib/content";
-import { findSchool, personHue, personProjects } from "@/lib/content/relations";
+import { findSchool, personProjects } from "@/lib/content/relations";
 import { isLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -42,7 +42,7 @@ function PersonCard({
   const projects = personProjects(content, person);
   return (
     <li className="flex gap-4 rounded-3xl bg-surface p-5">
-      <Avatar person={person} hue={personHue(content, person)} locale={locale} className="size-16" initialClassName="text-2xl" />
+      <Avatar person={person} locale={locale} className="size-16" />
       <div className="min-w-0">
         <p className="font-semibold leading-tight">{localize(person.name, locale)}</p>
         <p className="text-sm text-ink-2">{localize(person.role, locale)}</p>

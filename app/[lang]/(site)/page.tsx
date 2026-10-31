@@ -14,7 +14,7 @@ import { Scroller } from "@/components/scroller";
 import { localize } from "@/content/model";
 import { getNetworkSnapshot } from "@/lib/air/snapshot";
 import { getContent } from "@/lib/content";
-import { personHue, schoolHue, schoolProjects } from "@/lib/content/relations";
+import { schoolHue, schoolProjects } from "@/lib/content/relations";
 import { interpolate } from "@/lib/format";
 import { isLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -195,15 +195,11 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
                   href={`${href(lang, "/schools")}#${school.slug}`}
                   className="group block overflow-hidden rounded-3xl bg-surface transition-transform duration-300 hover:-translate-y-1"
                 >
-                  <div data-hue={schoolHue(content, school)} className="hue-portrait relative grid aspect-[3/4] place-items-center">
-                    {school.logo ? (
+                  {school.logo && (
+                    <div data-hue={schoolHue(content, school)} className="hue-portrait relative aspect-[3/4]">
                       <Image src={school.logo} alt="" fill sizes="15rem" className="object-contain p-10" />
-                    ) : (
-                      <span aria-hidden="true" className="text-7xl font-semibold tracking-[-0.04em]">
-                        {name.charAt(0)}
-                      </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   <div className="p-4">
                     <p className="font-semibold leading-tight">{name}</p>
                     <p className="mt-1 text-sm text-ink-3">
@@ -233,7 +229,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
           <ul className="flex flex-wrap gap-x-8 gap-y-5">
             {founders.map((person) => (
               <li key={person.id} className="flex items-center gap-3">
-                <Avatar person={person} hue={personHue(content, person)} locale={lang} className="size-12" initialClassName="text-lg" />
+                <Avatar person={person} locale={lang} className="size-12" />
                 <div>
                   <p className="font-medium leading-tight">{localize(person.name, lang)}</p>
                   <p className="text-sm text-ink-3">{localize(person.role, lang)}</p>

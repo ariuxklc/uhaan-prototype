@@ -43,7 +43,7 @@ export const en = {
   pillars: {
     title: "What we do",
     items: [
-      { title: "Connect schools", body: "Students from about seven schools building things together." },
+      { title: "Connect schools", body: "Students from schools across the city building things together." },
       { title: "Learn by building", body: "Electronics and Arduino workshops, by students for students." },
       { title: "Measure the air", body: "Low-cost monitors at schools, every reading on one open map." },
       { title: "Share the data", body: "What our monitors record becomes an open dataset for anyone." },
