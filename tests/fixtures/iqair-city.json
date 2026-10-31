@@ -1,0 +1,1 @@
+{"status":"success","data":{"city":"Ulaanbaatar","state":"Ulaanbaatar","country":"Mongolia","location":{"type":"Point","coordinates":[106.88324,47.90771]},"current":{"pollution":{"ts":"2026-10-09T15:00:00.000Z","aqius":154,"mainus":"p2","aqicn":88,"maincn":"p1"},"weather":{"ts":"2026-10-09T15:00:00.000Z","ic":"01n","hu":37,"pr":993,"tp":5,"wd":149,"ws":1.94,"heatIndex":5}}}}

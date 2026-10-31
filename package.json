@@ -1,37 +1,39 @@
 {
+  "name": "utaani-tagnuul",
+  "version": "1.0.0",
   "private": true,
+  "description": "Утааны Тагнуул — a public, non-commercial air-quality bulletin for Mongolia.",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "import:official-aqi": "node scripts/seed-official-aqi.mjs --import",
-    "import:official-aqi:preview": "node scripts/seed-official-aqi.mjs",
-    "import:official-aqi:replace": "node scripts/seed-official-aqi.mjs --replace-official",
-    "import:official-aqi:verify": "node scripts/seed-official-aqi.mjs --verify",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.12.4",
-    "@supabase/supabase-js": "^2.112.3",
+    "firebase-admin": "^14.5.0",
     "leaflet": "^1.9.4",
-    "lucide-react": "^0.511.0",
-    "next": "latest",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-leaflet": "^5.0.0",
-    "xlsx": "^0.18.5"
+    "next": "16.4.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/leaflet": "^1.9.22",
-    "@types/node": "^20.19.43",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "autoprefixer": "^10.4.20",
-    "eslint": "^9",
-    "eslint-config-next": "15.3.1",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5.9.3"
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "16.4.3",
+    "tailwindcss": "^4.3.3",
+    "typescript": "5.9.3",
+    "vite": "^7.0.0",
+    "vitest": "^5.0.3"
   }
 }

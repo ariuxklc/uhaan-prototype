@@ -1,231 +1,160 @@
-# AGENTS.md - Ulaanbaatar Air Quality Platform
+# AGENTS.md: Utaani Tagnuul (Утааны Тагнуул)
 
-## Critical Rules
+Website of Utaani Tagnuul, a student-led initiative from Sant School that
+connects schools in Ulaanbaatar through electronics, environmental projects and
+an open air-quality map. Mongolian (`/mn`, default) and English (`/en`). Read
+`docs/ARCHITECTURE.md` before changing data flow, caching or rate limiting.
 
-1. **Leaflet SSR boundary**
-   - Components that import `leaflet` or `react-leaflet` must start with `"use client"`.
-   - Do not import `components/AirQualityMap.tsx` directly into a Server Component.
-   - `components/DynamicAirQualityMap.tsx` is the current SSR boundary and imports `AirQualityMap` with `{ ssr: false }`.
-   - Keep `app/page.tsx` as a Server Component unless a specific feature requires otherwise.
+## Product direction
 
-2. **Supabase separation**
-   - Server Components and server-side data utilities import Supabase only from `@/utils/supabase/server`.
-   - There is currently no client-side Supabase utility in this repo. Do not add client Supabase access unless a feature truly needs it.
-   - Never expose service-role credentials or privileged keys to browser code.
-   - Do not add auth middleware, login, or account creation for the public dashboard unless explicitly requested.
+- Minimal and easy on the eyes. Emphasise the project itself (what it is, the
+  map, how to join), not surrounding detail. Keep copy short; add text only when
+  a visitor needs it.
+- The map is one part of the site. Wherever it appears it is shown whole and
+  full-bleed, with only small floating controls, as in the original prototype:
+  a section on the home page and the full-screen `/map` page.
+- Everything the map shows can be downloaded from the Data page (`/data`), with
+  its source and terms of use attached.
 
-3. **Data integrity and provenance**
-   - Never merge official and community readings into an anonymous pool. Canonical observations must keep `sourceType`, `sourceId`, coordinates, raw values, and original timestamps.
-   - Never treat `null`, `undefined`, missing, invalid, or stale measurements as `0`.
-   - Never label raw particulate concentration as an AQI score, and do not invent AQI conversion formulas.
-   - Development fixtures in `lib/air-quality/mock.ts` are only for `NODE_ENV === "development"` and must stay clearly labeled as non-live data.
+## Stack
 
-## Product
+Next.js 16 App Router (React 19, TypeScript strict), Tailwind CSS v4 (tokens in
+`app/globals.css`), Leaflet (used directly, no React wrapper), Vitest. One
+typeface: Geologica. Hosted on Vercel. No database yet; Firebase (Spark plan,
+data only) is planned (see the architecture doc). Don't add state, UI, mapping or data-fetching libraries without a clear
+need.
 
-- Public multi-source air-quality visualization for Ulaanbaatar, Mongolia.
-- Core question: "What is the air quality in this part of UB, and how recent is the information?"
-- Default map center: `[47.9184, 106.9177]`.
-- Default map zoom: `12`.
-- Normal dashboard use requires no authentication.
-- The platform complements official monitoring; it must not impersonate or replace official infrastructure.
+## Critical rules
 
-## Current Tech Stack
+1. **Data integrity**
+   - Show IQAir's published US AQI as is. Never compute, smooth or invent index
+     values, and never convert concentrations into an AQI yourself.
+   - Missing, invalid or failed values are `null` and render as a dash or a
+     status message. Never coerce them to `0`, and never count them as clean.
+   - Keep every reading's original `observedAt` and show its age; never make old
+     data look current.
+   - Keep provenance (`source.provider`, `source.resolution`). Never pool readings
+     from different providers anonymously. Sample data
+     (`lib/air/sample-provider.ts`) is development-only and must stay labelled.
+   - A city-level value is an average for the city. Don't describe it as a
+     measurement at a street or the marker's exact point. The map glow is a
+     visual aid, not an interpolated surface; the map's info panel says so.
+   - School monitor readings are shown as recorded: PM2.5 and PM10 in µg/m³.
+     An AQI appears only when the monitor's own CSV has one, and it is labelled
+     as the monitor's. Monitors carry `provider: "school-monitor"`,
+     `resolution: "station"` and are never pooled with IQAir values.
+   - `monitor-data/` holds real readings only. Never commit made-up or sample
+     rows there; tests write their fixtures to a temporary folder.
+   - Downloads may offer hourly or daily *means* of measured values (PM2.5,
+     PM10, temperature, humidity), always with the number of readings behind
+     each mean and never counting missing values as 0. Never average AQI values;
+     the monitors' own AQI appears only as recorded.
 
-- Next.js App Router with TypeScript.
-- Tailwind CSS and Lucide React.
-- Leaflet, React-Leaflet, OpenStreetMap/CARTO tiles.
-- Supabase via `@supabase/ssr` and PostgreSQL.
+2. **IQAir quota and terms**
+   - Free Community plan: 5 calls/min, 500/day, 10,000/month, and in practice no
+     two calls within ~12 s. All calls go through `lib/air/iqair-provider.ts`
+     (cache, ≥ 20 s between calls, backoff, 300-a-day cap per process).
+     Never call `fetchIqairCity` from a page, component or route handler
+     directly.
+   - Don't use `export const dynamic = "force-dynamic"` on data pages; it bypasses
+     `unstable_cache`. Use `await connection()`.
+   - Changing refresh tiers in `lib/locations.ts` must keep
+     `tests/locations.test.ts` passing (≤ 50% of the monthly quota).
+   - Bump `CACHE_VERSION` in the provider when the `AirReading` shape changes.
+   - Keep IQAir attribution on the map (attribution control) and in the footer.
+     Keep the project non-commercial (no ads or paid features) while on this plan.
+   - IQAir's conditions for showing or sharing its data (from IQAir, October
+     2026): non-commercial use only; for reference, never as evidence in legal
+     proceedings; cite IQAir as the source. Keep them on the Data page, in the
+     map's info panel and inside every download (`IQAIR_TERMS` in
+     `lib/downloads.ts`).
 
-Do not replace the core stack or add another mapping/UI/state library without explicit approval.
+3. **Secrets and privacy**
+   - `IQAIR_API_KEY` is server-only. Never prefix it with `NEXT_PUBLIC_`, pass it to
+     a client component, or include request URLs in logs or errors (the key is a
+     query parameter). `next.config.ts` disables full fetch URLs in logs.
+   - `.env.local` is git-ignored; only `.env.example` is committed.
+   - Don't publish students' personal details beyond what the team has approved.
+     `content/people.ts` lists only people who agreed to be shown (currently the
+     founders). `content/schools.ts` lists only approved partners; never publish
+     pending partnerships, funding details or internal coordination notes. The
+     contact address is configurable via `NEXT_PUBLIC_CONTACT_EMAIL`.
+   - Content is factual: no invented projects, members, dates or events. When a
+     date is only known to the month or year, store it that way.
+   - Photos of people go in `public/media/people/` only with that person's
+     agreement. Don't use stock or third-party images (the deck's component
+     pictures and background art are not ours to reuse).
 
-## Current File Responsibilities
+4. **Server/client boundaries**
+   - Components are Server Components unless they need state, effects or browser
+     APIs. Anything importing `leaflet` is a client component loaded through
+     `components/map/map-view.tsx` (`dynamic(..., { ssr: false })`).
+   - Server-only modules start with `import "server-only"`.
+   - Pages get content from `getContent()` (`lib/content`) and resolve links
+     between entries with `lib/content/relations.ts`. Don't import the arrays in
+     `content/*.ts` anywhere except `lib/content/static-source.ts` and tests;
+     that single source is where Firebase plugs in.
+   - Monitor readings come from `getMonitorReadings()` (`lib/monitors`), usually
+     through `getNetworkSnapshot()` or `getMonitorEntries()`. Only
+     `lib/monitors/csv-source.ts` reads `monitor-data/`; that source is where
+     Firestore plugs in.
+   - Time-dependent text must hydrate cleanly: pass the server's `renderedAt`
+     (`snapshot.assembledAt`) to `RelativeTime`.
 
-```text
-app/
-├── page.tsx                 Server Component; fetches observations and renders controls/map
-├── globals.css              Global Tailwind and Leaflet/map styling
-└── layout.tsx
+5. **Internationalisation**
+   - Every user-facing string exists in both `lib/i18n/dictionaries/en.ts` and
+     `mn.ts` (the type system and `tests/i18n.test.ts` enforce matching keys and
+     placeholders).
+   - Don't interpolate city names into Mongolian phrases that need a case ending
+     (…-ийн, …-д); rephrase instead.
 
-components/
-├── DynamicAirQualityMap.tsx Client wrapper; dynamic AirQualityMap import with ssr:false
-├── AirQualityMap.tsx        Leaflet map, canvas aura overlay, markers, popups, legend, theme toggle
-└── TimeControls.tsx         Client historical date/time controls and mounted source-toggle portal slot
+6. **Accessibility and design**
+   - Never rely on colour alone: every AQI colour comes with its value or band
+     name as text (markers carry an `aria-label`). Text colours must meet WCAG AA
+     in both themes; check new colours.
+   - Respect `prefers-reduced-motion`. Keep visible focus styles and the skip link.
+   - Anything that moves on its own (the schools strip) holds while hovered,
+     focused or touched, has a pause button, and stays still for reduced motion.
+   - Use the design tokens (`bg-bg`, `text-ink-2`, `glass`, `data-aqi` + `band-*`)
+     rather than raw colours.
+   - Any font must actually contain Mongolian Ө and Ү (U+04E8, U+04AE and their
+     lowercase forms). Check the glyphs; Google's "cyrillic-ext" subset label is
+     not enough.
 
-lib/air-quality/
-├── types.ts                 Canonical observation/source types
-├── normalize.ts             Raw row validation and source-specific normalization
-├── server.ts                Bounded Supabase queries and latest-per-source selection
-├── severity.ts              PM2.5/PM10 metric thresholds for overlay/marker severity
-├── freshness.ts             Centralized freshness labels
-└── mock.ts                  Development-only fixture observations
-
-utils/supabase/
-└── server.ts                Server Supabase client
-```
-
-Do not document or implement separate `HeatmapLayer`, `OfficialStationMarker`, `CommunitySensorMarker`, or `AirQualityLegend` components unless the codebase is actually refactored to contain them.
-
-## Database Schema
-
-### Community table: `aqi_readings`
-
-The community query currently selects:
-
-| Column | Type | Notes |
-| --- | --- | --- |
-| `sensor_id` | `text` | Community sensor identifier |
-| `lat` | `double precision` | Latitude |
-| `lng` | `double precision` | Longitude |
-| `pm25` | `double precision` | PM2.5 concentration in µg/m³; may be null |
-| `pm10` | `double precision` | PM10 concentration in µg/m³; may be null |
-| `created_at` | `timestamptz` | Original observation timestamp |
-
-The physical table may also contain an `id`, but the application does not select it for the map.
-
-### Official table: `official_aqi_readings`
-
-The official query currently selects:
-
-| Column | Type | Notes |
-| --- | --- | --- |
-| `station_id` | `text` | Official station identifier |
-| `station_name` | `text` | Public station name; may be null |
-| `lat` | `double precision` | Latitude |
-| `lng` | `double precision` | Longitude |
-| `pm25` | `double precision` | PM2.5 concentration in µg/m³; may be null |
-| `pm10` | `double precision` | PM10 concentration in µg/m³; may be null |
-| `o3` | `double precision` | Ozone concentration in µg/m³; may be null |
-| `no2` | `double precision` | Nitrogen dioxide concentration in µg/m³; may be null |
-| `co` | `double precision` | Carbon monoxide concentration in mg/m³; may be null |
-| `so2` | `double precision` | Sulfur dioxide concentration in µg/m³; may be null |
-| `observed_at` | `timestamptz` | Original observation timestamp |
-
-Use explicit column lists. Do not use `select("*")` for map data.
-
-## Canonical Data Model
-
-`lib/air-quality/types.ts` is the source of truth:
-
-```ts
-export type SourceType = "official" | "community";
-
-export interface AirQualityObservation {
-  sourceType: SourceType;
-  sourceId: string;
-  latitude: number;
-  longitude: number;
-  pm25: number | null;
-  pm10: number | null;
-  o3?: number | null;
-  no2?: number | null;
-  co?: number | null;
-  so2?: number | null;
-  observedAt: string;
-  stationName?: string;
-}
-```
-
-Community rows normalize to `sourceType: "community"` and do not provide gas fields. Official rows normalize to `sourceType: "official"` and preserve PM plus gas fields.
-
-## Data Flow
+## Layout
 
 ```text
-app/page.tsx
-  -> fetchAirQualityObservations(targetTime?)
-  -> bounded community and official Supabase queries
-  -> validate raw rows
-  -> normalize to AirQualityObservation[]
-  -> select latest eligible reading per source ID
-  -> DynamicAirQualityMap
-  -> AirQualityMap
+app/[lang]/(site)/    home, projects, schools, team, updates, data (header and footer)
+app/[lang]/map/       full-screen map (no header or footer)
+app/[lang]/           root layout, not-found, error, OG image
+app/api/air/capital/  capital's AQI band for the site-wide backdrop (CDN-cached)
+app/api/data/[file]/  downloads (cities, monitors, monitor-<id>; .csv or .json)
+components/           UI; map/ holds the Leaflet map (markers + glow) and its view
+content/              schools, people, projects, updates, monitors; typed, bilingual
+monitor-data/         school monitor CSVs, one folder per monitor id (see its README)
+lib/content/          content source (static today, Firestore later), validation, relations
+lib/monitors/         monitor CSV parser and source (CSV today, Firestore later)
+lib/firebase/         server-only Firebase Admin app and Firestore
+lib/iqair/            framework-free IQAir client, parser, errors, rate limiter
+lib/air/              reading types, IQAir/sample providers, request snapshot
+lib/view-model.ts     serialisable city and station summaries for the map
+lib/map-props.ts      snapshot → map props (cities, stations, labels, status)
+lib/downloads.ts      download rows, CSV/JSON writers, terms of use
+lib/i18n/             locales, dictionaries, route helpers
+lib/aqi.ts            US AQI bands and colours
+lib/locations.ts      the 22 IQAir cities, identifiers, refresh tiers, geo helpers
+proxy.ts              locale redirect + remembered-locale cookie
+tests/                Vitest unit tests
 ```
 
-Historical views pass a `timestamp` query parameter. Queries include records at or before that instant, then select the latest eligible reading per source ID. Freshness is evaluated relative to the selected snapshot when present.
+## Validation
 
-## Map And Popup Behavior
-
-- `AirQualityMetric` currently supports only `"pm25"` and `"pm10"` in `lib/air-quality/severity.ts`.
-- The active metric drives marker color, legend thresholds, and the canvas aura overlay in `AirQualityMap.tsx`.
-- Do not combine PM2.5 and PM10 into one metric. Do not use gas values in the overlay until explicit gas thresholds and product rules exist.
-- The canvas aura is a derived spatial visualization from available observation points. It must not be described as a direct measurement at unmonitored locations.
-- Official and community observations must remain visually distinguishable in markers and popups.
-
-Station popups in `AirQualityMap.tsx` must show all six pollutant cells at once:
-
-| Pollutant | Unit | Missing display |
-| --- | --- | --- |
-| PM2.5 | µg/m³ | `--` |
-| PM10 | µg/m³ | `--` |
-| Ozone (O3) | µg/m³ | `--` |
-| Nitrogen Dioxide (NO2) | µg/m³ | `--` |
-| Carbon Monoxide (CO) | mg/m³ | `--` |
-| Sulfur Dioxide (SO2) | µg/m³ | `--` |
-
-The popup grid uses two columns by default and three columns on small-and-up screens. The cell matching `activeMetric` gets subtle active highlighting, even for community sensors. Missing gas fields on community observations must render as `--`, never `NaN`, `undefined`, or `0`.
-
-## SSR And Hydration
-
-- `DynamicAirQualityMap.tsx` is a Client Component solely to disable SSR for the Leaflet map.
-- `AirQualityMap.tsx` is a Client Component because it imports Leaflet and React-Leaflet.
-- `TimeControls.tsx` is a Client Component because it uses router/search params, local interaction state, timers, and browser APIs.
-- The source filter button is rendered through a portal from `AirQualityMap.tsx` into `#aq-source-toggle-slot` owned by `TimeControls.tsx`.
-- To avoid hydration mismatches, both the slot and the portal lookup/rendering are gated by `hasMounted` state. Do not render portal content or DOM-slot-only markup before mount.
-
-## Freshness And Time Handling
-
-- Use `lib/air-quality/freshness.ts` for freshness status.
-- Current thresholds are:
-  - `< 2 hours`: `Recent`
-  - `2-24 hours`: `Stale`
-  - invalid, future relative to reference time, or older than 24 hours: `No recent data`
-- Preserve original observation timestamps. Never rewrite historical timestamps to make readings look current.
-
-## Missing And Invalid Data
-
-- Validate coordinates before rendering markers.
-- Validate raw rows in `lib/air-quality/normalize.ts`.
-- Missing pollutant values may be displayed as `--` or omitted from visualizations, depending on context.
-- Missing values must never be converted to zero.
-- If Supabase fails, show a useful notice and do not expose raw database errors to users.
-
-## Public Access, Privacy, And Security
-
-- Public users can view the dashboard without login.
-- Do not expose resident names, personal contact information, occupancy details, or private sensor metadata.
-- Never trust client input for future writes.
-- Never allow users to spoof official source provenance.
-- If write paths are added later, validate source IDs, coordinates, timestamps, PM2.5, PM10, O3, NO2, CO, and SO2 server-side.
-
-## Styling And Accessibility
-
-- Use Tailwind CSS and Lucide React.
-- Keep the UI responsive for mobile, tablet, laptop, and desktop.
-- Keep OpenStreetMap/tile-provider attribution visible.
-- Do not rely only on color to communicate source type, severity, or status; keep textual equivalents where practical.
-- Light mode is the default for first-time visitors. Preserve explicit light/dark preference in local storage.
-
-## Dependency Discipline
-
-Do not add Redux, Axios, Zustand, Material UI, Mapbox, another mapping library, auth infrastructure, a separate backend, GraphQL, a CMS, or a second database unless explicitly requested.
-
-Before adding any dependency, prefer the existing stack or a small native implementation.
-
-## Development And Validation
-
-Before meaningful code changes:
-
-1. Inspect the current implementation.
-2. Reuse existing utilities/components.
-3. Keep the change scoped.
-4. Preserve source provenance and raw measurements.
-5. Run available validation, usually:
+Run before finishing any change:
 
 ```bash
-npx tsc --noEmit
-npm run lint
+npm run check   # next typegen + tsc, eslint, vitest
 npm run build
 ```
 
-If a validation command cannot run because dependencies or local tooling are unavailable, report that clearly.
-
-Do not use `any`, `@ts-ignore`, disabled lint rules, or fabricated data to force a passing build.
+Don't silence errors with `any`, `@ts-ignore` or disabled lint rules. If a
+command can't run (missing network or key), say so.
