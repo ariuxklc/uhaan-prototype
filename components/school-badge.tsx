@@ -13,7 +13,7 @@ export function SchoolBadge({
   if (!school.logo) return null;
   return (
     <span className={`relative block shrink-0 overflow-hidden bg-surface ${className}`}>
-      <Image src={school.logo} alt="" fill sizes="64px" className="object-contain p-1" />
+      <Image src={school.logo} alt="" fill sizes="64px" className="object-contain p-[8%]" />
     </span>
   );
 }

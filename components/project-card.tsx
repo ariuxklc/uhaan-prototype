@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { Avatar } from "@/components/avatar";
 import { ArrowRightIcon } from "@/components/icons";
+import { SchoolBadge } from "@/components/school-badge";
 import { localize } from "@/content/model";
 import type { Project, ProjectStatus } from "@/content/model";
 import { projectHue, projectPeople, projectSchools } from "@/lib/content/relations";
@@ -60,7 +61,7 @@ export function ProjectCard({
 }) {
   const Heading = headingLevel;
   const people = projectPeople(content, project);
-  const schools = projectSchools(content, project).map((school) => localize(school.name, locale));
+  const schools = projectSchools(content, project);
   const withPhotos = people.filter((person) => person.photo);
 
   return (
@@ -109,7 +110,16 @@ export function ProjectCard({
               {people.length > 0 && (
                 <p className="text-ink-2">{people.map((person) => localize(person.name, locale)).join(", ")}</p>
               )}
-              <p className="text-ink-3">{schools.join(", ")}</p>
+              {schools.length > 0 && (
+                <ul className="mt-0.5 flex flex-wrap gap-x-3 gap-y-1 text-ink-3">
+                  {schools.map((school) => (
+                    <li key={school.slug} className="flex items-center gap-1.5">
+                      <SchoolBadge school={school} className="size-5 rounded-md" />
+                      {localize(school.name, locale)}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
           {project.path && (

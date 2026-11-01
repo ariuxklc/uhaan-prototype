@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Avatar } from "@/components/avatar";
 import { ArrowRightIcon } from "@/components/icons";
 import { PageIntro } from "@/components/page-intro";
+import { SchoolBadge } from "@/components/school-badge";
 import { localize } from "@/content/model";
 import type { Person } from "@/content/model";
 import { getContent } from "@/lib/content";
@@ -46,7 +47,12 @@ function PersonCard({
       <div className="min-w-0">
         <p className="font-semibold leading-tight">{localize(person.name, locale)}</p>
         <p className="text-sm text-ink-2">{localize(person.role, locale)}</p>
-        {school && <p className="text-sm text-ink-3">{localize(school.name, locale)}</p>}
+        {school && (
+          <p className="mt-0.5 flex items-center gap-1.5 text-sm text-ink-3">
+            <SchoolBadge school={school} className="size-5 rounded-md" />
+            {localize(school.name, locale)}
+          </p>
+        )}
         {projects.length > 0 && (
           <div className="mt-3">
             <p className="text-xs text-ink-3">{dict.teamPage.worksOn}</p>
